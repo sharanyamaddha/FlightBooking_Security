@@ -67,7 +67,7 @@ public class UserDetailsImpl implements UserDetails{
         return username;
     }
 
-    // For now all account flags = true
+
     @Override
     public boolean isAccountNonExpired() { return true; }
     @Override
