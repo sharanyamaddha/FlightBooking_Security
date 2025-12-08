@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class BookingController {
   
 
 	@PostMapping("/booking/{flightId}")
+	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	public ResponseEntity<String> createBooking(@PathVariable("flightId") String flightId,
 	                                            @Valid @RequestBody BookingRequest request) {
 	    BookingResponse saved = bookingService.createBooking(flightId, request);
@@ -38,6 +40,7 @@ public class BookingController {
 
 
     @GetMapping("/booking/{pnr}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<BookingResponse> getBookingByPnr(@PathVariable("pnr") String pnr) {
         BookingResponse booking = bookingService.getBookingByPnr(pnr);
         if (booking == null) {
@@ -47,19 +50,20 @@ public class BookingController {
     }
 
     @GetMapping("/booking/history/{email}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<BookingResponse>> getBookingHistory(@PathVariable("email") String email) {
         List<BookingResponse> history = bookingService.getBookingHistory(email);
         return ResponseEntity.ok(history);
     }
 
     @DeleteMapping("/booking/cancel/{pnr}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<String> cancelBooking(@PathVariable("pnr") String pnr) {
         String message = bookingService.cancelBooking(pnr);
         if (message == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // If you later want cancel events via Kafka, handle it inside BookingService
         return ResponseEntity.ok(message);
     }
 
