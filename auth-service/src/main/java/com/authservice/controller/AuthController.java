@@ -40,22 +40,25 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        String jwt = jwtUtils.generateJwtToken(userDetails);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(a -> a.getAuthority())
+                .toList();
 
         JwtResponse jwtResponse = new JwtResponse(
+                jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                userDetails.getAuthorities()
-                        .stream()
-                        .map(a -> a.getAuthority())
-                        .collect(Collectors.toList())
+                roles
         );
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(jwtResponse);
+        return ResponseEntity.ok(jwtResponse);
     }
+
+
 
 
     @PostMapping("/signup")
