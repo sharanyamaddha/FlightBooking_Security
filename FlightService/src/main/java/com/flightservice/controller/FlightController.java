@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ public class FlightController {
 	FlightService flightService;
 	
 	@PostMapping("/flights")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> addFlights(@Valid @RequestBody FlightRequest request){
 		Flight saved = flightService.addFlights(request);
 		return ResponseEntity
@@ -36,18 +38,21 @@ public class FlightController {
 	}
 	
 	@PostMapping("/flights/search")
+	 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	public ResponseEntity<List<FlightResponse>> searchFlights(@RequestBody FlightRequest request) {
 	    List<FlightResponse> responses = flightService.searchFlights(request);
 	    return ResponseEntity.ok(responses);
 	}
 	
 	 @GetMapping("/flights/{id}")
+	 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	    public ResponseEntity<FlightResponse> getFlightById(@PathVariable("id") String id) {
 	        FlightResponse response = flightService.getFlightById(id);
 	        return ResponseEntity.ok(response);
 	    }
 
 	    @PostMapping("/flights/{id}/reserve")
+	    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	    public ResponseEntity<ReserveSeatsResponse> reserveSeats(@PathVariable("id") String id,
 	                                                             @Valid @RequestBody ReserveSeatsRequest request) {
 	        ReserveSeatsResponse res = flightService.reserveSeats(id, request);
@@ -55,6 +60,7 @@ public class FlightController {
 	    }
 
 	    @PostMapping("/flights/{id}/release")
+	    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	    public ResponseEntity<Void> releaseSeats(@PathVariable("id") String id,
 	                                             @Valid @RequestBody ReleaseSeatsRequest request) {
 	        flightService.releaseSeats(id, request);
