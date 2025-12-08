@@ -1,10 +1,6 @@
 package com.authservice.controller;
 
-
-import com.authservice.dto.JwtResponse;
-import com.authservice.dto.LoginRequest;
-import com.authservice.dto.MessageResponse;
-import com.authservice.dto.SignupRequest;
+import com.authservice.dto.*;
 import com.authservice.model.ERole;
 import com.authservice.model.User;
 import com.authservice.repository.UserRepository;
@@ -23,24 +19,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@CrossOrigin(origins = "*", maxAge = 3600) 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    @Autowired private AuthenticationManager authenticationManager;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder encoder;
+    @Autowired private JwtUtils jwtUtils;
 
-    @Autowired
-    UserRepository userRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    //  SIGNIN
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -52,18 +40,16 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
 
         JwtResponse jwtResponse = new JwtResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                roles
+                userDetails.getAuthorities()
+                        .stream()
+                        .map(a -> a.getAuthority())
+                        .collect(Collectors.toList())
         );
 
         return ResponseEntity.ok()
@@ -71,55 +57,62 @@ public class AuthController {
                 .body(jwtResponse);
     }
 
-    //  SIGNUP
+
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest req) {
 
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+        if (userRepository.existsByUsername(req.getUsername())) {
+            return badRequest("Error: Username is already taken!");
         }
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
-
-      
-        List<String> strRoles = signUpRequest.getRoles();
-        Set<String> roles = new HashSet<>();
-
-        if (strRoles == null || strRoles.isEmpty()) {
-            roles.add(ERole.ROLE_USER.name());
-        } else {
-            strRoles.forEach(role -> {
-                if ("admin".equalsIgnoreCase(role)) {
-                    roles.add(ERole.ROLE_ADMIN.name());
-                } else {
-                    roles.add(ERole.ROLE_USER.name());
-                }
-            });
+        if (userRepository.existsByEmail(req.getEmail())) {
+            return badRequest("Error: Email is already in use!");
         }
 
         User user = new User();
-        user.setUsername(signUpRequest.getUsername());
-        user.setEmail(signUpRequest.getEmail());
-        user.setPassword(encoder.encode(signUpRequest.getPassword()));
-        user.setRoles(new ArrayList<>(roles));
+        user.setUsername(req.getUsername());
+        user.setEmail(req.getEmail());
+        user.setPassword(encoder.encode(req.getPassword()));
+        user.setRoles(resolveRoles(req.getRoles()));
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new MessageResponse("User registered successfully!"));
     }
 
-    //  SIGNOUT
+
     @PostMapping("/signout")
     public ResponseEntity<?> logoutUser() {
-        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, jwtUtils.getCleanJwtCookie().toString())
                 .body(new MessageResponse("You've been signed out!"));
+    }
+
+
+
+    private ResponseEntity<?> badRequest(String message) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponse(message));
+    }
+
+    private List<String> resolveRoles(List<String> rolesFromRequest) {
+
+        if (rolesFromRequest == null || rolesFromRequest.isEmpty()) {
+            return List.of(ERole.ROLE_USER.name());
+        }
+
+        List<String> roles = new ArrayList<>();
+        rolesFromRequest.forEach(role -> {
+            if ("admin".equalsIgnoreCase(role)) {
+                roles.add(ERole.ROLE_ADMIN.name());
+            } else {
+                roles.add(ERole.ROLE_USER.name());
+            }
+        });
+
+        return roles;
     }
 }
