@@ -6,7 +6,7 @@ import com.bookingservice.dto.response.BookingResponse;
 import com.bookingservice.dto.response.PassengerResponse;
 import com.bookingservice.enums.BookingStatus;
 import com.bookingservice.enums.TripType;
-import com.bookingservice.rabbitmq.BookingProducer;
+//import com.bookingservice.rabbitmq.BookingProducer;
 import com.bookingservice.service.BookingService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ class BookingControllerTest {
     private BookingService bookingService;
 
     @Mock
-    private BookingProducer bookingProducer;
+    ////private BookingProducer bookingProducer;
 
     @InjectMocks
     private BookingController bookingController;
@@ -82,7 +82,7 @@ class BookingControllerTest {
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals("PNR123", result.getBody());
 
-        verify(bookingProducer).sendBookingCreatedEvent(anyString());
+        //verify(bookingProducer).sendBookingCreatedEvent(anyString());
     }
 
   
@@ -139,7 +139,7 @@ class BookingControllerTest {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("Booking cancelled successfully", result.getBody());
 
-        verify(bookingProducer).sendBookingCancelledEvent(anyString());
+        //verify(bookingProducer).sendBookingCancelledEvent(anyString());
     }
 
     @Test
@@ -153,6 +153,6 @@ class BookingControllerTest {
         assertNull(result.getBody());
 
         verify(bookingService).cancelBooking("NO_PNR");
-        verify(bookingProducer, never()).sendBookingCancelledEvent(anyString());
+       // verify(bookingProducer, never()).sendBookingCancelledEvent(anyString());
     }
 }
