@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - flight-net
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mongodb
+    networks:
+      - flight-net
+
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    networks:
+      - flight-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - config-server
+      - service-registry
+    networks:
+      - flight-net
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - config-server
+      - service-registry
+      - mongodb
+    networks:
+      - flight-net
+
+  bookingservice:
+    build: ./BookingService   # folder name can remain uppercase
+    container_name: booking-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server
+      - service-registry
+      - mongodb
+    networks:
+      - flight-net
+
+  flightservice:
+    build: ./FlightService
+    container_name: flight-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-server
+      - service-registry
+      - mongodb
+    networks:
+      - flight-net
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - config-server
+      - service-registry
+    networks:
+      - flight-net
+
+networks:
+  flight-net:
+    driver: bridge
