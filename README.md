@@ -40,8 +40,10 @@ The system consists of the following services:
   All authentication is handled by Auth-Service.
 
   -  Endpoints
-      POST /api/auth/signup   # Register new user
-      POST /api/auth/signin   # Login and receive JWT
+    
+      POST /api/auth/signup    # Register new user
+     
+      POST /api/auth/signin    # Login and receive JWT
 
   - Successful Login Returns:
 
