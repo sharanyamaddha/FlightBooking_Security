@@ -107,7 +107,7 @@ The system consists of the following services:
   
     Defines who can access which endpoint based on roles
     
-    The downstream microservices do not enforce authentication —
+    The downstream microservices do not enforce authentication -
     the gateway completely controls access.
 
 
