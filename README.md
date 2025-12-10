@@ -25,7 +25,7 @@ The system consists of the following services:
 
 - **NotificationService**
   - Listens to Kafka events (`booking-created`, `booking-cancelled`)
-  - Sends booking confirmation / cancellation notifications (email / log)
+  - Sends booking confirmation / cancellation notifications (email)
 
 - **Eureka Server**
   - Service discovery for all microservices
@@ -77,6 +77,7 @@ The system consists of the following services:
   JwtAuthFilter
   
   This filter executes before requests reach any microservice.
+  
   It:
 
   - Reads the Authorization header
