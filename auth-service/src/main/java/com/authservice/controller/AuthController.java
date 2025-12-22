@@ -5,8 +5,8 @@ import com.authservice.model.ERole;
 import com.authservice.model.User;
 import com.authservice.repository.UserRepository;
 import com.authservice.security.JwtUtils;
+import com.authservice.service.AuthServiceImpl;
 import com.authservice.service.UserDetailsImpl;
-import com.authservice.service.UserDetailsServiceImpl;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class AuthController {
     @Autowired private PasswordEncoder encoder;
     @Autowired private JwtUtils jwtUtils;
     @Autowired
-    private UserDetailsServiceImpl authService;
+    private AuthServiceImpl authService;
 
 
     @PostMapping("/signin")

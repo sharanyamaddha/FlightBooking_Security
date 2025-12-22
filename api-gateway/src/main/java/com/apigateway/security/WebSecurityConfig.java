@@ -49,9 +49,6 @@ public class WebSecurityConfig {
                     .hasAnyAuthority("ROLE_USER")
 
                 
-
-
-
                 // Search flights public
                 .requestMatchers(HttpMethod.POST, "/flights/search").permitAll()
 

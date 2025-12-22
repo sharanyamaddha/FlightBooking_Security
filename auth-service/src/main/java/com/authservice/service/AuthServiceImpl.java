@@ -1,6 +1,7 @@
 package com.authservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,23 +20,31 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String changePassword(ChangePasswordRequest req) {
-    	  System.out.println(">>> changePassword SERVICE method HIT");
 
-        User user = userRepository.findByEmail(req.getEmail())
+        // Get logged-in username from JWT
+        String username = SecurityContextHolder.getContext()
+            .getAuthentication().getName();
+
+        System.out.println("JWT USER = " + username);
+
+        // Fetch user using username 
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         System.out.println("OLD HASH = " + user.getPassword());
 
-
-        if(!encoder.matches(req.getOldPassword(), user.getPassword())) {
-            throw new RuntimeException("Old password incorrect!");
+        // Validate old password
+        if (!encoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Old password incorrect");
         }
 
+        // Encode & save new password
         user.setPassword(encoder.encode(req.getNewPassword()));
-
-       
         userRepository.save(user);
+
         System.out.println("NEW HASH = " + user.getPassword());
 
         return "Password changed successfully";
     }
+
 }

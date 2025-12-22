@@ -30,8 +30,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            // Get JWT from cookie
-            String jwt = jwtUtils.getJwtFromCookies(request);
+            
+        	String headerAuth = request.getHeader("Authorization");
+
+        	String jwt = null;
+        	if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+        	    jwt = headerAuth.substring(7);
+        	}
+
 
             // Validate and set auth
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
