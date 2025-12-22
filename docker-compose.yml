@@ -1,6 +1,7 @@
-version: '3.8'
+version: "3.8"
 
 services:
+
   mongodb:
     image: mongo:6
     container_name: mongodb
@@ -8,6 +9,21 @@ services:
       - "27017:27017"
     networks:
       - flight-net
+    restart: always
+
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+      EUREKA_INSTANCE_HOSTNAME: service-registry
+    networks:
+      - flight-net
+    restart: always
 
   config-server:
     build: ./config-server
@@ -15,30 +31,17 @@ services:
     ports:
       - "8888:8888"
     depends_on:
-      - mongodb
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: config-server
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/sharanyamaddha/flightapp_config_repo.git
+      SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
     networks:
       - flight-net
-
-  service-registry:
-    build: ./service-registry
-    container_name: service-registry
-    ports:
-      - "8761:8761"
-    depends_on:
-      - config-server
-    networks:
-      - flight-net
-
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    ports:
-      - "8090:8090"
-    depends_on:
-      - config-server
-      - service-registry
-    networks:
-      - flight-net
+    restart: always
 
   auth-service:
     build: ./auth-service
@@ -46,35 +49,57 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - config-server
-      - service-registry
-      - mongodb
+      config-server:
+        condition: service_started
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: auth-service
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/authdb
     networks:
       - flight-net
+    restart: always
 
-  bookingservice:
-    build: ./BookingService   # folder name can remain uppercase
+  booking-service:
+    build: ./BookingService
     container_name: booking-service
     ports:
       - "8081:8081"
     depends_on:
-      - config-server
-      - service-registry
-      - mongodb
+      config-server:
+        condition: service_started
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: booking-service
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
     networks:
       - flight-net
+    restart: always
 
-  flightservice:
+  flight-service:
     build: ./FlightService
     container_name: flight-service
     ports:
       - "8080:8080"
     depends_on:
-      - config-server
-      - service-registry
-      - mongodb
+      config-server:
+        condition: service_started
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: flight-service
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
     networks:
       - flight-net
+    restart: always
 
   notification-service:
     build: ./notification-service
@@ -82,10 +107,37 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - config-server
-      - service-registry
+      config-server:
+        condition: service_started
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: notification-service
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
     networks:
       - flight-net
+    restart: always
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      config-server:
+        condition: service_started
+      service-registry:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: api-gateway
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    networks:
+      - flight-net
+    restart: always
 
 networks:
   flight-net:

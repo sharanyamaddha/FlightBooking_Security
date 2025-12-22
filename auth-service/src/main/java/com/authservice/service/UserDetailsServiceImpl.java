@@ -2,6 +2,7 @@ package com.authservice.service;
 
 
 
+import com.authservice.dto.ChangePasswordRequest;
 import com.authservice.model.User;
 import com.authservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+    
 
     @Override
     public UserDetails loadUserByUsername(String username)
@@ -27,5 +29,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return UserDetailsImpl.build(user);
     }
+
+
+	public String changePassword(ChangePasswordRequest req) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
+ 
 }
 

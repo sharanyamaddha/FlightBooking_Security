@@ -22,8 +22,6 @@ import com.authservice.service.UserDetailsServiceImpl;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;   
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;

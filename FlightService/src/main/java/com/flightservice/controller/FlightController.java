@@ -29,6 +29,7 @@ public class FlightController {
 	
 	@PostMapping("/flights")
 	public ResponseEntity<String> addFlights(@Valid @RequestBody FlightRequest request){
+		System.out.println(">>> FlightService: addFlights CALLED");
 		Flight saved = flightService.addFlights(request);
 		return ResponseEntity
 						.status(HttpStatus.CREATED)

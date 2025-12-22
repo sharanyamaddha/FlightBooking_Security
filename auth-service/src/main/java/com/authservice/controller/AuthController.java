@@ -6,6 +6,7 @@ import com.authservice.model.User;
 import com.authservice.repository.UserRepository;
 import com.authservice.security.JwtUtils;
 import com.authservice.service.UserDetailsImpl;
+import com.authservice.service.UserDetailsServiceImpl;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class AuthController {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder encoder;
     @Autowired private JwtUtils jwtUtils;
+    @Autowired
+    private UserDetailsServiceImpl authService;
 
 
     @PostMapping("/signin")
@@ -76,7 +79,10 @@ public class AuthController {
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
         user.setPassword(encoder.encode(req.getPassword()));
-        user.setRoles(resolveRoles(req.getRoles()));
+        user.setRoles(
+        	    List.of("ROLE_" + req.getRole().toUpperCase())
+        	);
+
 
         userRepository.save(user);
 
@@ -117,5 +123,11 @@ public class AuthController {
         });
 
         return roles;
+    }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest req){
+    	String message=authService.changePassword(req);
+    	return ResponseEntity.ok(new MessageResponse(message));
     }
 }

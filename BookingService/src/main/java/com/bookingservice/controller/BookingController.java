@@ -39,6 +39,7 @@ public class BookingController {
 
     @GetMapping("/booking/{pnr}")
     public ResponseEntity<BookingResponse> getBookingByPnr(@PathVariable("pnr") String pnr) {
+    	System.out.println(">>> BookingService: booking CALLED");
         BookingResponse booking = bookingService.getBookingByPnr(pnr);
         if (booking == null) {
             return ResponseEntity.notFound().build();
@@ -48,6 +49,7 @@ public class BookingController {
 
     @GetMapping("/booking/history/{email}")
     public ResponseEntity<List<BookingResponse>> getBookingHistory(@PathVariable("email") String email) {
+    	System.out.println(">>> BookingService: booking CALLED");
         List<BookingResponse> history = bookingService.getBookingHistory(email);
         return ResponseEntity.ok(history);
     }

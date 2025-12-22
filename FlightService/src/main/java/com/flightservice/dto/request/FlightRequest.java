@@ -1,6 +1,9 @@
 package com.flightservice.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -20,6 +23,10 @@ public class FlightRequest {
 	
 	@NotBlank
 	String destination;
+	
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate date;
+
 	
 	@NotNull
 	@FutureOrPresent(message="departure time must be before arrival time")

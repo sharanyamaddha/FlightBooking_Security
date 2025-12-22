@@ -1,6 +1,8 @@
 package com.flightservice.serviceImpl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -89,11 +91,20 @@ public class FlightServiceImpl implements FlightService {
         String source = request.getSource();
         String destination = request.getDestination();
         String airlineName = request.getAirlineName();
+        LocalDate date = request.getDate();
 
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
         List<FlightResponse> responses = new ArrayList<>();
 
         if (airlineName == null || airlineName.isBlank()) {
-            List<Flight> flights = flightRepository.findBySourceIgnoreCaseAndDestinationIgnoreCase(source, destination);
+        	List<Flight> flights = flightRepository
+                    .findBySourceIgnoreCaseAndDestinationIgnoreCaseAndDepartureDateTimeBetween(
+                            source,
+                            destination,
+                            startOfDay,
+                            endOfDay
+                    );
             for (Flight f : flights) {
                 responses.add(mapFlightToResponse(f));
             }
@@ -119,6 +130,7 @@ public class FlightServiceImpl implements FlightService {
 
         FlightResponse res = new FlightResponse();
         res.setFlightNo(flight.getFlightNo());
+        res.setFlightId(flight.getFlightId());
         res.setAirlineName(airlineName);
         res.setSource(flight.getSource());
         res.setDestination(flight.getDestination());

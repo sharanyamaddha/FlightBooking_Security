@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -13,32 +14,67 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     @Bean
+    public JwtAuthFilter jwtAuthFilter() {
+        return new JwtAuthFilter();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(csrf -> csrf.disable());
+        http
+            // Disable CSRF for APIs
+            .csrf(csrf -> csrf.disable())
 
-       
-        http.addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+            // ENABLE CORS (VERY IMPORTANT)
+            .cors(cors -> {})
 
-        http.authorizeHttpRequests(auth -> auth
+            // Stateless (JWT)
+            .sessionManagement(sess ->
+                sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            .authorizeHttpRequests(auth -> auth
+
+                // ALLOW PREFLIGHT REQUESTS
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                .requestMatchers("/api/auth/**").permitAll()
+              //AUTH APIs (ONLY signin/signup)
+                .requestMatchers(
+                        "/api/auth/signin",
+                        "/api/auth/signup"
+                    ).permitAll()
 
-                // ADMIN ONLY — add flights
+                // CHANGE PASSWORD (PROTECTED)
+                .requestMatchers("/api/auth/change-password")
+                    .hasAnyAuthority("ROLE_USER")
+
+                
+
+
+
+                // Search flights public
+                .requestMatchers(HttpMethod.POST, "/flights/search").permitAll()
+
+                // ADMIN only
                 .requestMatchers(HttpMethod.POST, "/flights")
-                        .hasAuthority("ROLE_ADMIN")
+                    .hasAuthority("ROLE_ADMIN")
 
-                // USER or ADMIN — other flight endpoints
-                .requestMatchers("/flights/**")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                // Flight APIs
+                .requestMatchers(HttpMethod.GET, "/flights/**")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                .requestMatchers(HttpMethod.POST, "/flights/**")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
 
-                // USER or ADMIN — booking endpoints
+                // Booking APIs
                 .requestMatchers("/booking/**")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
 
-                // everything else must be authenticated
+                // Everything else secured
                 .anyRequest().authenticated()
-        );
+            )
+
+            // JWT filter
+            .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -18,7 +18,12 @@ public interface FlightRepository extends MongoRepository<Flight, String> {
             LocalDateTime departureDateTime
     );
 
-    List<Flight> findBySourceIgnoreCaseAndDestinationIgnoreCase(String source, String destination);
+    List<Flight> findBySourceIgnoreCaseAndDestinationIgnoreCaseAndDepartureDateTimeBetween(
+            String source,
+            String destination,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
     List<Flight> findByAirlineIdIgnoreCase(String airlineId);
 

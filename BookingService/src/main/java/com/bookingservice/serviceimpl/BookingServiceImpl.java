@@ -63,18 +63,16 @@ public class BookingServiceImpl implements BookingService {
     @CircuitBreaker(name=FLIGHT_SERVICE_CB,fallbackMethod= "createBookingFallback")
     public BookingResponse createBooking(String flightId, BookingRequest request) {
 
-        // 1) Fetch flight metadata from FlightService
-    	// NEW – don't wrap it, let the exception bubble up
+
     	FlightDto flightDto = flightClient.getFlight(flightId);
 
 
-        // 2) Validate passenger count
+
         int passengerCount = request.getPassengers().size();
         if (flightDto.getAvailableSeats() < passengerCount) {
             throw new BusinessException("Not enough seats available");
         }
 
-        // 3) Normalize seat numbers and check conflicts
         List<String> seatNos = request.getPassengers().stream()
                 .map(PassengerRequest::getSeatNo)
                 .filter(Objects::nonNull)
@@ -93,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         }
         
         
-        // 4) Reserve seats on flight-service
+        //  Reserve seats on flight-service
         String bookingReference = "BR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         ReserveSeatsRequest reserveReq = new ReserveSeatsRequest();
         reserveReq.setBookingReference(bookingReference);
@@ -108,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BusinessException("Seat reservation failed: " + msg);
         }
 
-        // 5) Create booking locally
+        //  Create booking locally
         String pnr = "PNR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         Booking booking = new Booking();
         booking.setPnr(pnr);
@@ -122,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        // 6) Save passengers
+        //  Save passengers
         List<Passenger> passengersToSave = request.getPassengers().stream().map(pReq -> {
             Passenger p = new Passenger();
             p.setName(pReq.getName());
@@ -153,7 +151,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BusinessException("Failed to save passengers: " + ex.getMessage());
         }
 
-        // 7) Build response
+        //  Build response
         BookingResponse response = new BookingResponse();
         response.setPnr(savedBooking.getPnr());
         response.setStatus(savedBooking.getStatus());
