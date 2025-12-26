@@ -2,8 +2,11 @@ package com.flightservice.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.flightservice.model.Flight;
@@ -33,4 +36,13 @@ public interface FlightRepository extends MongoRepository<Flight, String> {
             String destination,
             LocalDateTime departureDateTime
     );
+    
+    @Query("select distinct f.source from Flight f")
+    List<Flight> findDistinctSources();
+    
+    @Query("select distinct f.destination from Flight f")
+    List<Flight> findDistinctDestinations();
+    
+    Optional<Flight> findById(String id);
+
 }

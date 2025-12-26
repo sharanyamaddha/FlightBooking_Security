@@ -1,6 +1,8 @@
 package com.flightservice.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,5 +62,21 @@ public class FlightController {
 	                                             @Valid @RequestBody ReleaseSeatsRequest request) {
 	        flightService.releaseSeats(id, request);
 	        return ResponseEntity.ok().build();
+	    }
+	    
+	    @GetMapping("/flights/sources")
+	    public Map<String,List<String>> getSources(){
+	    	return flightService.getSources();
+	    }
+	    
+	    @GetMapping("/flights/destinations")
+	    public Map<String,List<String>> getDestinations(){
+	    	return flightService.getDestinations();
+	    }
+	    
+	    @GetMapping("/flights/{flightId}/seats/count")
+	    public Map<String,Integer> getTotalSeats(@PathVariable String flightId){
+	    	int totalSeats=flightService.getTotalSeats(flightId);
+	    	return Map.of("totalSeats",totalSeats);
 	    }
 }

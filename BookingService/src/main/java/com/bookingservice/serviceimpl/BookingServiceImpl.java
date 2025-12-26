@@ -354,5 +354,15 @@ public class BookingServiceImpl implements BookingService {
 
         
     }
+    
+    @Override
+    public List<Passenger> getBookedSeats(String flightId){
+    	if(flightId==null) {
+    		throw new BusinessException("FLight Id cannot be empty");
+    	}
+    	
+    	return passengerRepository.findSeatNosByFlightId(flightId);
+
+    }
 
 }

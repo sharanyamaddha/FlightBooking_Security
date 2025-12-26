@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.bookingservice.dto.request.BookingRequest;
 import com.bookingservice.dto.response.BookingResponse;
+import com.bookingservice.model.Passenger;
 
 public interface BookingService {
 
@@ -15,4 +16,6 @@ public interface BookingService {
 	    List<BookingResponse> getBookingHistory(String email);
 
 	    String cancelBooking(String pnr);
+	    
+	    List<Passenger> getBookedSeats(String flightId);
 }

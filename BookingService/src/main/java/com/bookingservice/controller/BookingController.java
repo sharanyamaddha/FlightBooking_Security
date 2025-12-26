@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bookingservice.dto.request.BookingRequest;
 import com.bookingservice.dto.response.BookingResponse;
-
+import com.bookingservice.model.Passenger;
 import com.bookingservice.service.BookingService;
 
 import jakarta.validation.Valid;
@@ -64,4 +64,8 @@ public class BookingController {
         return ResponseEntity.ok(message);
     }
 
+    @GetMapping("/booking/seats/{flightId}")
+    public ResponseEntity<List<Passenger>> getBookedSeats(@PathVariable String flightId){
+    	return ResponseEntity.ok(bookingService.getBookedSeats(flightId));
+    }
 }

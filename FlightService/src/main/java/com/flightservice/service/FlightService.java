@@ -1,6 +1,8 @@
 package com.flightservice.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.flightservice.dto.request.FlightRequest;
 import com.flightservice.dto.request.ReleaseSeatsRequest;
@@ -21,4 +23,10 @@ Flight addFlights(FlightRequest request);
     ReserveSeatsResponse reserveSeats(String flightId, ReserveSeatsRequest request);
 
     void releaseSeats(String flightId, ReleaseSeatsRequest request);
+    
+    Map<String, List<String>> getSources();
+    
+    Map<String, List<String>> getDestinations();
+    
+    int getTotalSeats(String flightId);
 }

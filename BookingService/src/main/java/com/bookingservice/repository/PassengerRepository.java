@@ -16,6 +16,9 @@ public interface PassengerRepository extends MongoRepository<Passenger,String>{
 	public List<Passenger> findByPnr(String pnr);
 
 	public long countByPnr(String pnr);
+	
+	List<Passenger> findSeatNosByFlightId(String flightId);
+
 
 
 }

@@ -51,6 +51,12 @@ public class WebSecurityConfig {
                 
                 // Search flights public
                 .requestMatchers(HttpMethod.POST, "/flights/search").permitAll()
+                
+             //  dropdown APIs
+                .requestMatchers(HttpMethod.GET,
+                    "/flights/sources",
+                    "/flights/destinations"
+                ).permitAll()
 
                 // ADMIN only
                 .requestMatchers(HttpMethod.POST, "/flights")

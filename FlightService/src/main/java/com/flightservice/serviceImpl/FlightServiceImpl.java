@@ -4,8 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -204,4 +208,48 @@ public class FlightServiceImpl implements FlightService {
     }
 
     
+    @Override
+    public Map<String, List<String>> getSources(){
+    	 List<Flight> sources=flightRepository.findDistinctSources() ;    	 
+    	 List<String> sourceList=sources.stream()
+    			 .map(f->f.getSource())
+    			 .filter(Objects::nonNull)
+    			 .distinct()
+    			 .sorted()
+    			 .toList();
+ 
+    	Map<String,List<String>> res=new HashMap<>();
+    	res.put("Sources",sourceList);
+
+    	return res;
+    	}
+    
+    
+    @Override
+    public Map<String, List<String>> getDestinations(){
+    	 List<Flight> destinations=flightRepository.findDistinctDestinations() ;
+    	 List<String> destinationList=destinations.stream()
+    			 .map(f->f.getDestination())
+    			 .filter(Objects::nonNull)
+    			 .distinct()
+    			 .sorted()
+    			 .toList();
+    	  
+    	Map<String,List<String>> res=new HashMap<>();
+    	res.put("Destinations",destinationList);
+
+    	return res;
+    	}
+    
+    @Override
+    public int getTotalSeats(String flightId) {
+    	if(flightId==null) {
+            throw new BusinessException("Flight Id cannot be empty");
+    	}
+    	
+    	Flight flight=flightRepository.findById(flightId)
+    			.orElseThrow(() -> new BusinessException("Flight not found"));
+    	
+    	return flight.getTotalSeats();
+    }
 }
