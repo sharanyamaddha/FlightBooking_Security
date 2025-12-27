@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY target/BookingService-0.0.1-SNAPSHOT.jar app.jar
 
-CMD ["java","-jar","app.jar"]
+CMD ["java","-Dspring.profiles.active=docker","-jar","app.jar"]
