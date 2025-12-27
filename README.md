@@ -1,5 +1,5 @@
 # Flight Booking Microservices with Spring Security & JWT
-This project is a microservices-based **Flight Booking System** built with **Spring Boot**, **Spring Cloud**, and **Spring Security** using **JWT** authentication.
+This project is a microservices-based **Flight Booking System** built with **Spring Boot**, **Spring Cloud**, and **Spring Security** using **JWT**  authentication.
 
 ## Microservices Overview
 
